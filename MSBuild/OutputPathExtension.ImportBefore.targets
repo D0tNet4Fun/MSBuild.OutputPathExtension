@@ -9,7 +9,7 @@ WARNING:  DO NOT MODIFY this file unless you are knowledgeable about MSBuild and
 ***********************************************************************************************
 -->
 
-<!--EXTERNAL_PROPERTIES: RootOutputPath;ProjectAssetsFile; -->
+<!--EXTERNAL_PROPERTIES: RootOutputPath;FailIfRootOutputPathNotAvailable;ProjectAssetsFile; -->
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   
   <Import Project="OutputPathExtension.props" />
@@ -21,6 +21,10 @@ WARNING:  DO NOT MODIFY this file unless you are knowledgeable about MSBuild and
   </PropertyGroup>
 
   <PropertyGroup Condition="$(UsingOutputPathExtension)">
+    <_RootOutputPathExists Condition="Exists('$(RootOutputPath)')">true</_RootOutputPathExists>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(_RootOutputPathExists)' == 'true'">
     <!-- determine $(ProjectBaseOutputPath) which will be used as the path for this project's output -->
     <!-- given ProjectDir is E:\Path\To\Projects\MyProject, then: -->
 
@@ -52,5 +56,19 @@ WARNING:  DO NOT MODIFY this file unless you are knowledgeable about MSBuild and
     <ProjectAssetsFile Condition="'$(ProjectAssetsFile)' != '' AND $(ProjectAssetsFile.StartsWith('$(MSBuildProjectDirectory)'))">$(BaseIntermediateOutputPath)$([System.IO.Path]::GetFileName('$(ProjectAssetsFile)'))</ProjectAssetsFile>
 
   </PropertyGroup>
+
+  <!--
+  ============================================================
+                                      _CheckForInvalidRootOutputPath
+
+  Issues a warning or an error if property RootOutputPath is set but the path does not exist at build time, depending on the value of property FailIfRootOutputPathNotAvailable.
+  ============================================================
+  -->
+  <Target Name="_CheckForInvalidRootOutputPath" BeforeTargets="BeforeBuild">
+    <Warning Condition="'$(_RootOutputPathExists)' != 'true' AND '$(FailIfRootOutputPathNotAvailable)' != 'true'"
+             Text="[MSBuildOutputPathExtension] The root output path '$(RootOutputPath)' is not currently available. The build will use the default output paths." />
+    <Error Condition="'$(_RootOutputPathExists)' != 'true' AND '$(FailIfRootOutputPathNotAvailable)' == 'true'"
+           Text="[MSBuildOutputPathExtension] The root output path '$(RootOutputPath)' is not currently available." />
+  </Target>
 
 </Project>

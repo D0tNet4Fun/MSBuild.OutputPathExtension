@@ -12,6 +12,7 @@ EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Scripts", "Scripts", "{E86773A0-6E34-4284-BFF7-3E66F3A0DA50}"
 	ProjectSection(SolutionItems) = preProject
 		MSBuild\OutputPathExtension.ImportBefore.targets = MSBuild\OutputPathExtension.ImportBefore.targets
+		MSBuild\OutputPathExtension.props = MSBuild\OutputPathExtension.props
 	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Imports", "Imports", "{2F45B2A1-C3EA-48E8-A9E9-3F756A5F89F2}"

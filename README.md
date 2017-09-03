@@ -6,9 +6,18 @@ The extension sets well-known properties such as `IntermediateOutputPath` and `O
 I.e. given the project directory is `E:\Path\To\Projects\MyProject` and the build configuration is `Debug`, then:
 - the intermediate path will be set to `$(RootOutputPath)\E\Path\To\Projects\MyProject\obj\Debug`
 - the final output path will be set to `$(RootOutputPath)\E\Path\To\Projects\MyProject\bin\Debug`
+
+## Features
+
+#### Configure the root output path
 The root output path can be configured in two ways:
 - by setting the environment variable `MSBuildRootOutputPath`, which is the preferred way when using the IDE
 - by setting the MSBuild property `RootOutputPath`
+
+#### Change build behavior when the root output path is not available at build time
+The MSBuild roperty `FailIfRootOutputPathNotAvailable` can be set to `true` in order to fail the build in this case. 
+When the property is set to `false`, the build will issue a warning and it will proceed using the default output paths.
+
 
 ## MSBuild support
 The extension is supported in MSBuild 15.0.

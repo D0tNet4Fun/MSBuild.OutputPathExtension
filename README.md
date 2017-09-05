@@ -18,17 +18,10 @@ The root output path can be configured in two ways:
 The MSBuild roperty `FailIfRootOutputPathNotAvailable` can be set to `true` in order to fail the build in this case. 
 When the property is set to `false`, the build will issue a warning and it will proceed using the default output paths.
 
-
-## MSBuild support
-The extension is supported in MSBuild 15.0.
-
-## MSBuild integration
-When installed, the extension is automatically imported by MSBuild via `Microsoft.Common.targets`'s before and after imports.
-If not installed, the extension can be imported manually in MSBuild projects. I.e.
-```xml
-<Import Project="$(MSBuildExtensionsPath)\OutputPathExtension\OutputPathExtension.ImportBefore.targets" />
-<Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
-```
-
 ## Installation
 The extension can be installed and uninstalled using PowerShell scripts available in the Setup directory.
+When installed, the extension is automatically imported by MSBuild via `Microsoft.Common.Props` and `Microsoft.Common.Targets`.
+
+## MSBuild support
+- The extension is supported in MSBuild 15.0.
+- .NET Core projects are not supported.

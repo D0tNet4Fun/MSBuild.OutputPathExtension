@@ -26,13 +26,14 @@ CreateDirectoryIfNeeded($destination)
 Copy-Item "$source\*.*" $destination -Exclude "MSBuild\Imports" -Recurse -Force
 Write-Host "Copied OutputPathExtension directory"
 
-# copy Import targets
+# copy .props and .targets to Import directories
+$destination = "$msbuildExtensionPath\Imports\Microsoft.Common.props\ImportBefore"
+CreateDirectoryIfNeeded($destination)
+Copy-Item "$source\Imports\Props\OutputPathExtension.ImportBefore.props" $destination -Force
+
 $destination = "$msbuildExtensionPath\Microsoft.Common.Targets\ImportBefore"
 CreateDirectoryIfNeeded($destination)
-Copy-Item "$source\Imports\OutputPathExtension.ImportBefore.targets" $destination -Force
-
-$destination = "$msbuildExtensionPath\Microsoft.Common.Targets\ImportAfter"
-CreateDirectoryIfNeeded($destination)
-Copy-Item "$source\Imports\OutputPathExtension.ImportAfter.targets" $destination -Force
+Copy-Item "$source\Imports\Targets\OutputPathExtension.ImportBefore.props" $destination -Force
+Copy-Item "$source\Imports\Targets\OutputPathExtension.ImportBefore.targets" $destination -Force
 
 Write-Host "Integrated with Microsoft.Common.Targets"

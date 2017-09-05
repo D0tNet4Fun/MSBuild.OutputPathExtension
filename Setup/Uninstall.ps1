@@ -13,13 +13,13 @@ Write-Host "Uninstalling extension from MSBuild 15.0"
 EnsureProcessNotRunning("MSBuild")
 $msbuildExtensionPath = "${Env:ProgramFiles(x86)}\MSBuild\15.0"
 
-# delete the Import targets
-$path = "$msbuildExtensionPath\Microsoft.Common.Targets\ImportBefore\OutputPathExtension.ImportBefore.targets"
+# delete the .props and .targets from Import directories
+$path = "$msbuildExtensionPath\Imports\Microsoft.Common.Props\**\OutputPathExtension*"
 if (Test-Path $path) {
     Remove-Item $path -Force
     $deleted = $true
 }
-$path = "$msbuildExtensionPath\Microsoft.Common.Targets\ImportAfter\OutputPathExtension.ImportAfter.targets"
+$path = "$msbuildExtensionPath\Microsoft.Common.Targets\**\OutputPathExtension*"
 if (Test-Path $path) {
     Remove-Item $path -Force
     $deleted = $true
@@ -29,7 +29,7 @@ if ($deleted) {
 }
 
 # delete the extension directory
-$path = "$msbuildExtensionPath\OutputPathExtension"
+$path = "$msbuildExtensionPath\..\OutputPathExtension"
 if (Test-Path $path) {
     Remove-Item $path -Recurse -Force
     Write-Host "Deleted OutputPathExtension directory"

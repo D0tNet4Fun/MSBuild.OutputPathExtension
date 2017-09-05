@@ -1,0 +1,29 @@
+﻿<!--
+***********************************************************************************************
+OutputPathExtension.ImportBeforeCommonTargets.targets
+
+WARNING:  DO NOT MODIFY this file unless you are knowledgeable about MSBuild and have
+          created a backup copy.  Incorrect changes to this file will make it
+          impossible to load or build your projects from the command-line or the IDE.
+
+***********************************************************************************************
+-->
+
+<!--EXTERNAL_PROPERTIES: _RootOutputPathExists;FailIfRootOutputPathNotAvailable;RootOutputPath -->
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+
+  <!--
+  ============================================================
+                                      _CheckForInvalidRootOutputPath
+
+  Issues a warning or an error if property RootOutputPath is set but the path does not exist at build time, depending on the value of property FailIfRootOutputPathNotAvailable.
+  ============================================================
+  -->
+  <Target Name="_CheckForInvalidRootOutputPath" Condition="$(UsingOutputPathExtension)" BeforeTargets="BeforeBuild">
+    <Warning Condition="'$(_RootOutputPathExists)' != 'true' AND '$(FailIfRootOutputPathNotAvailable)' != 'true'"
+             Text="[MSBuildOutputPathExtension] The root output path '$(RootOutputPath)' is not currently available. The build will use the default output paths." />
+    <Error Condition="'$(_RootOutputPathExists)' != 'true' AND '$(FailIfRootOutputPathNotAvailable)' == 'true'"
+           Text="[MSBuildOutputPathExtension] The root output path '$(RootOutputPath)' is not currently available." />
+  </Target>
+
+</Project>

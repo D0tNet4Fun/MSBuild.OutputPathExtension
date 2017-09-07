@@ -10,15 +10,13 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "MSBuild 15.0 Reference", "M
 	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Scripts", "Scripts", "{E86773A0-6E34-4284-BFF7-3E66F3A0DA50}"
-	ProjectSection(SolutionItems) = preProject
-		MSBuild\OutputPathExtension.ImportBefore.targets = MSBuild\OutputPathExtension.ImportBefore.targets
-		MSBuild\OutputPathExtension.props = MSBuild\OutputPathExtension.props
-	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Imports", "Imports", "{2F45B2A1-C3EA-48E8-A9E9-3F756A5F89F2}"
 	ProjectSection(SolutionItems) = preProject
-		MSBuild\Imports\OutputPathExtension.ImportAfter.targets = MSBuild\Imports\OutputPathExtension.ImportAfter.targets
-		MSBuild\Imports\OutputPathExtension.ImportBefore.targets = MSBuild\Imports\OutputPathExtension.ImportBefore.targets
+		MSBuild\Imports\Targets\OutputPathExtension.ImportAfter.targets = MSBuild\Imports\Targets\OutputPathExtension.ImportAfter.targets
+		MSBuild\Imports\Props\OutputPathExtension.ImportBefore.props = MSBuild\Imports\Props\OutputPathExtension.ImportBefore.props
+		MSBuild\Imports\Targets\OutputPathExtension.ImportBefore.props = MSBuild\Imports\Targets\OutputPathExtension.ImportBefore.props
+		MSBuild\Imports\Targets\OutputPathExtension.ImportBefore.targets = MSBuild\Imports\Targets\OutputPathExtension.ImportBefore.targets
 	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Setup", "Setup", "{654A8766-98BD-43B9-90BE-952B4B03BEFB}"
@@ -27,12 +25,27 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Setup", "Setup", "{654A8766
 		Setup\Uninstall.ps1 = Setup\Uninstall.ps1
 	EndProjectSection
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Props", "Props", "{EB5BF56A-A5AD-4D0B-AF2B-6DF8EF7924B1}"
+	ProjectSection(SolutionItems) = preProject
+		MSBuild\OutputPathExtension.ImportBeforeCommonProps.props = MSBuild\OutputPathExtension.ImportBeforeCommonProps.props
+		MSBuild\OutputPathExtension.ImportBeforeCommonTargets.props = MSBuild\OutputPathExtension.ImportBeforeCommonTargets.props
+		MSBuild\OutputPathExtension.props = MSBuild\OutputPathExtension.props
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Targets", "Targets", "{5A032C18-DAD1-4F3B-9D6A-C633FE20113E}"
+	ProjectSection(SolutionItems) = preProject
+		MSBuild\OutputPathExtension.ImportAfterCommonTargets.targets = MSBuild\OutputPathExtension.ImportAfterCommonTargets.targets
+		MSBuild\OutputPathExtension.ImportBeforeCommonTargets.targets = MSBuild\OutputPathExtension.ImportBeforeCommonTargets.targets
+	EndProjectSection
+EndProject
 Global
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
 	EndGlobalSection
 	GlobalSection(NestedProjects) = preSolution
 		{2F45B2A1-C3EA-48E8-A9E9-3F756A5F89F2} = {E86773A0-6E34-4284-BFF7-3E66F3A0DA50}
+		{EB5BF56A-A5AD-4D0B-AF2B-6DF8EF7924B1} = {E86773A0-6E34-4284-BFF7-3E66F3A0DA50}
+		{5A032C18-DAD1-4F3B-9D6A-C633FE20113E} = {E86773A0-6E34-4284-BFF7-3E66F3A0DA50}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {A1F523CD-7E3F-4435-B749-BB4A514CC839}

@@ -21,10 +21,12 @@ WARNING:  DO NOT MODIFY this file unless you are knowledgeable about MSBuild and
          and which has the output path set to bin\Debug (which is the default)
          then the final output path will become R:\Build\E\Path\To\Projects\MyProject\bin\Debug
 
-    FailIfRootOutputPathNotAvailable
+    FailIfRootOutputPathNotAvailable:
     If true then the build will issue an error if the root output path does not exist at build time. 
     Otherwise a warning will be issued and the build will use the default output paths.
 
+    UseLinksInOutputPath:
+    If true then some of the files copied to the output paths will be symbolic links. This applies to references and project references.
   -->
 
   <PropertyGroup>
@@ -32,6 +34,8 @@ WARNING:  DO NOT MODIFY this file unless you are knowledgeable about MSBuild and
     <RootOutputPath Condition="'$(RootOutputPath)' == ''">$(MSBuildRootOutputPath)</RootOutputPath>
 
     <FailIfRootOutputPathNotAvailable Condition="'$(FailIfRootOutputPathNotAvailable)' == ''">true</FailIfRootOutputPathNotAvailable>
+
+    <UseLinksInOutputPath Condition="'$(UseLinksInOutputPath)' == ''">true</UseLinksInOutputPath>
 
   </PropertyGroup>
 </Project>

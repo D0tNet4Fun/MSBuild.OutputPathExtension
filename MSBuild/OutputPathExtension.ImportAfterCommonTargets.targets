@@ -19,7 +19,7 @@ WARNING:  DO NOT MODIFY this file unless you are knowledgeable about MSBuild and
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(UseLinksInOutputPath)' == 'true' AND $(_RootOutputPathExists)">
-    <PrepareForRunDependsOn>_IgnoreBuildingInsideVisualStudio;$(PrepareForRunDependsOn);_RestoreBuildingInsideVisualStudio</PrepareForRunDependsOn>
+    <PrepareForRunDependsOn>_IgnoreBuildingInsideVisualStudio;$(PrepareForRunDependsOn);_RestoreBuildingInsideVisualStudio;_VerifyOutputIsLinked</PrepareForRunDependsOn>
   </PropertyGroup>
 
   <!--
@@ -50,6 +50,18 @@ WARNING:  DO NOT MODIFY this file unless you are knowledgeable about MSBuild and
       <BuildingInsideVisualStudio>$(_BuildingInsideVisualStudio)</BuildingInsideVisualStudio>
       <_BuildingInsideVisualStudio></_BuildingInsideVisualStudio>
     </PropertyGroup>
+  </Target>
+
+  <!--
+  ============================================================
+                                      _VerifyOutputIsLinked
+
+  Verify if the TargetPath is a symbolic link. If this is not the case then a warning is issued to indicate elevation is required.
+  ============================================================
+  -->
+  <Target Name="_VerifyOutputIsLinked">
+    <Warning Condition="Exists('$(TargetPath)') AND $([MSBuild]::BitwiseAnd(1024, $([System.IO.File]::GetAttributes('$(TargetPath)')))) == 0"
+             Text="[MSBuildOutputPathExtension] Could not use links in the output folder. Make sure the process runs elevated." />
   </Target>
 
 </Project>

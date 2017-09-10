@@ -29,7 +29,7 @@ WARNING:  DO NOT MODIFY this file unless you are knowledgeable about MSBuild and
     If true then some of the files copied to the output paths will be symbolic links. This applies to references and project references.
   -->
 
-  <PropertyGroup>
+  <PropertyGroup Condition="'$(SolutionName)' != 'MSBuildOutputPathExtension'">
     <!-- set the RootOutputPath as value of environment variable 'MSBuildRootOutputPath' -->
     <RootOutputPath Condition="'$(RootOutputPath)' == ''">$(MSBuildRootOutputPath)</RootOutputPath>
 

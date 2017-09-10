@@ -11,8 +11,8 @@ WARNING:  DO NOT MODIFY this file unless you are knowledgeable about MSBuild and
 
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
 
-  <!--override the default MSBuild properties if $(ProjectRootOutputPath) exists -->
-  <PropertyGroup Condition="'$(ProjectRootOutputPath)' != ''">
+  <!--override the default MSBuild properties if $(RootOutputPath) exists -->
+  <PropertyGroup Condition="'$(_RootOutputPathExists)' == 'true'">
 
     <!-- override intermediate output path -->
     <IntermediateOutputPath Condition="'$(IntermediateOutputPath)' != '' AND !$([System.IO.Path]::IsPathRooted('$(IntermediateOutputPath)'))">$(ProjectRootOutputPath)$(IntermediateOutputPath)</IntermediateOutputPath>

@@ -23,6 +23,8 @@ When the property is set to `false`, the build will issue a warning and it will 
 The MSBuild property `UseLinksInOutputPath` can be set to `true` to create symbolic links in the output path. This is used to minimize the disk space used by the project output.
 Creating symbolic links require _SeCreateSymbolicLinkPrivilege_. If this is not available at build time then a warning is issued to indicate the process needs to be elevated.
 
+Note: when the project's output type is .exe, the produced .exe is copied as a new file regardless if the property is set or not. This is designed to prevent the various issues that may appear at runtime because of the symbolic link behavior.
+
 ## Installation
 The extension can be installed and uninstalled using PowerShell scripts available in the Setup directory.
 When installed, the extension is automatically imported by MSBuild via `Microsoft.Common.Props` and `Microsoft.Common.Targets`.

@@ -20,7 +20,7 @@ WARNING:  DO NOT MODIFY this file unless you are knowledgeable about MSBuild and
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(UseLinksInOutputPath)' == 'true' AND $(_RootOutputPathExists)">
-    <PrepareForRunDependsOn>_IgnoreBuildingInsideVisualStudio;$(PrepareForRunDependsOn);_RestoreBuildingInsideVisualStudio;_VerifyOutputIsLinked</PrepareForRunDependsOn>
+    <PrepareForRunDependsOn>_IgnoreBuildingInsideVisualStudio;$(PrepareForRunDependsOn);_RestoreBuildingInsideVisualStudio;_CopyExe;_VerifyOutputIsLinked</PrepareForRunDependsOn>
   </PropertyGroup>
 
   <!--
@@ -55,12 +55,27 @@ WARNING:  DO NOT MODIFY this file unless you are knowledgeable about MSBuild and
 
   <!--
   ============================================================
+                                      _CopyExe
+
+  If the target path is an .exe, this .exe needs to be copied to the final output path as a new file instead of as a symbolic link.
+  ============================================================
+  -->
+  <Target Name="_CopyExe" Condition="'$(TargetExt)' == '.exe'">
+    <PropertyGroup>
+      <_IntermediateTargetPath>$(IntermediateOutputPath)$(TargetFileName)</_IntermediateTargetPath>
+    </PropertyGroup>
+    <Delete Files="$(TargetPath)" ContinueOnError="true" />
+    <Copy SourceFiles="$(_IntermediateTargetPath)" DestinationFiles="$(TargetPath)" SkipUnchangedFiles="false" />
+  </Target>
+
+  <!--
+  ============================================================
                                       _VerifyOutputIsLinked
 
   Verify if the TargetPath is a symbolic link. If this is not the case then a warning is issued to indicate elevation is required.
   ============================================================
   -->
-  <Target Name="_VerifyOutputIsLinked">
+  <Target Name="_VerifyOutputIsLinked" Condition="'$(TargetExt)' != '.exe'">
     <Warning Condition="Exists('$(TargetPath)') AND $([MSBuild]::BitwiseAnd(1024, $([System.IO.File]::GetAttributes('$(TargetPath)')))) == 0"
              Text="[MSBuildOutputPathExtension] Could not use links in the output folder. Make sure the process runs elevated." />
   </Target>

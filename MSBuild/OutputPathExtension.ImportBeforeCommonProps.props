@@ -1,6 +1,6 @@
 ﻿<!--
 ***********************************************************************************************
-OutputPathExtension.ImportBefore.targets
+OutputPathExtension.ImportBeforeCommonProps.props
 
 WARNING:  DO NOT MODIFY this file unless you are knowledgeable about MSBuild and have
           created a backup copy.  Incorrect changes to this file will make it
@@ -9,8 +9,10 @@ WARNING:  DO NOT MODIFY this file unless you are knowledgeable about MSBuild and
 ***********************************************************************************************
 -->
 
-<!--EXTERNAL_PROPERTIES: RootOutputPath;ProjectAssetsFile; -->
+<!--EXTERNAL_PROPERTIES: RootOutputPath;FailIfRootOutputPathNotAvailable;ProjectAssetsFile; -->
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  
+  <Import Project="$(MSBuildExtensionsPath)\OutputPathExtension\OutputPathExtension.props" />
 
   <!-- define property UsingOutputPathExtension which can be used in scripts to detect if OutputPathExtension is being used -->
   <PropertyGroup>
@@ -19,6 +21,10 @@ WARNING:  DO NOT MODIFY this file unless you are knowledgeable about MSBuild and
   </PropertyGroup>
 
   <PropertyGroup Condition="$(UsingOutputPathExtension)">
+    <_RootOutputPathExists Condition="Exists('$(RootOutputPath)')">true</_RootOutputPathExists>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(_RootOutputPathExists)' == 'true'">
     <!-- determine $(ProjectBaseOutputPath) which will be used as the path for this project's output -->
     <!-- given ProjectDir is E:\Path\To\Projects\MyProject, then: -->
 
@@ -32,23 +38,11 @@ WARNING:  DO NOT MODIFY this file unless you are knowledgeable about MSBuild and
 
     <ProjectRootOutputPath>$([System.IO.Path]::Combine('$(RootOutputPath)', '$(ProjectDirDrive)', '$(ProjectDirRelativeToRoot)'))</ProjectRootOutputPath>
     <ProjectRootOutputPath Condition="!HasTrailingSlash('$(ProjectRootOutputPath)')">$(ProjectRootOutputPath)\</ProjectRootOutputPath>
-    <!-- $(BaseOutputPath)\E\Path\To\Projects\MyProject\ -->
+    <!-- $(RootOutputPath)\E\Path\To\Projects\MyProject\ -->
   </PropertyGroup>
 
-  <!--override the default MSBuild properties if $(ProjectRootOutputPath) exists -->
   <PropertyGroup Condition="'$(ProjectRootOutputPath)' != ''">
-
-    <!-- override intermediate output path -->
     <BaseIntermediateOutputPath Condition="'$(BaseIntermediateOutputPath)' != '' AND !$([System.IO.Path]::IsPathRooted('$(BaseIntermediateOutputPath)'))">$(ProjectRootOutputPath)$(BaseIntermediateOutputPath)</BaseIntermediateOutputPath>
-    <IntermediateOutputPath Condition="'$(IntermediateOutputPath)' != '' AND !$([System.IO.Path]::IsPathRooted('$(IntermediateOutputPath)'))">$(ProjectRootOutputPath)$(IntermediateOutputPath)</IntermediateOutputPath>
-
-    <!-- override final output path -->
-    <BaseOutputPath Condition="'$(BaseOutputPath)' != '' AND !$([System.IO.Path]::IsPathRooted('$(BaseOutputPath)'))">$(ProjectRootOutputPath)$(BaseOutputPath)</BaseOutputPath>
-    <OutputPath Condition="'$(OutputPath)' != '' AND !$([System.IO.Path]::IsPathRooted('$(OutputPath)'))">$(ProjectRootOutputPath)$(OutputPath)</OutputPath>
-
-    <!-- override ProjectAssetsFile which by default is relative to the project directory -->
-    <ProjectAssetsFile Condition="'$(ProjectAssetsFile)' != '' AND $(ProjectAssetsFile.StartsWith('$(MSBuildProjectDirectory)'))">$(BaseIntermediateOutputPath)$([System.IO.Path]::GetFileName('$(ProjectAssetsFile)'))</ProjectAssetsFile>
-
   </PropertyGroup>
 
 </Project>

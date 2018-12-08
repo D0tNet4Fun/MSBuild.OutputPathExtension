@@ -1,0 +1,4 @@
+﻿<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Condition="Exists('$(MSBuildExtensionsPath)\OutputPathExtension\OutputPathExtension.ImportBeforeCommonTargets.props')"
+          Project="$(MSBuildExtensionsPath)\OutputPathExtension\OutputPathExtension.ImportBeforeCommonTargets.props" />
+</Project>

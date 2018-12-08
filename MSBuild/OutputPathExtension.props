@@ -1,0 +1,37 @@
+﻿<!--
+***********************************************************************************************
+OutputPathExtension.props
+
+WARNING:  DO NOT MODIFY this file unless you are knowledgeable about MSBuild and have
+          created a backup copy.  Incorrect changes to this file will make it
+          impossible to load or build your projects from the command-line or the IDE.
+
+***********************************************************************************************
+-->
+
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+
+  <!--
+    The list of properties which change build behavior:
+
+    RootOutputPath:
+    The directory where the Obj and Bin directories will be created.
+    I.e. if the root output path is set to R:\Build, then:
+         given a project whose path is E:\Path\To\Projects\MyProject\Project1.csproj 
+         and which has the output path set to bin\Debug (which is the default)
+         then the final output path will become R:\Build\E\Path\To\Projects\MyProject\bin\Debug
+
+    FailIfRootOutputPathNotAvailable
+    If true then the build will issue an error if the root output path does not exist at build time. 
+    Otherwise a warning will be issued and the build will use the default output paths.
+
+  -->
+
+  <PropertyGroup>
+    <!-- set the RootOutputPath as value of environment variable 'MSBuildRootOutputPath' -->
+    <RootOutputPath Condition="'$(RootOutputPath)' == ''">$(MSBuildRootOutputPath)</RootOutputPath>
+
+    <FailIfRootOutputPathNotAvailable Condition="'$(FailIfRootOutputPathNotAvailable)' == ''">true</FailIfRootOutputPathNotAvailable>
+
+  </PropertyGroup>
+</Project>

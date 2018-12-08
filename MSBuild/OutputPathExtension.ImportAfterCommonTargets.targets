@@ -9,6 +9,7 @@ WARNING:  DO NOT MODIFY this file unless you are knowledgeable about MSBuild and
 ***********************************************************************************************
 -->
 
+<!--EXTERNAL_PROPERTIES: UseLinksInOutputPath;_RootOutputPathExists-->
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
 
   <!-- enable CreateSymbolicLink* built-in properties -->

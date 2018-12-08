@@ -41,7 +41,7 @@ WARNING:  DO NOT MODIFY this file unless you are knowledgeable about MSBuild and
     <!-- $(RootOutputPath)\E\Path\To\Projects\MyProject\ -->
   </PropertyGroup>
 
-  <PropertyGroup Condition="'$(ProjectRootOutputPath)' != ''">
+  <PropertyGroup Condition="'$(_RootOutputPathExists)' == 'true'">
     <BaseIntermediateOutputPath Condition="'$(BaseIntermediateOutputPath)' != '' AND !$([System.IO.Path]::IsPathRooted('$(BaseIntermediateOutputPath)'))">$(ProjectRootOutputPath)$(BaseIntermediateOutputPath)</BaseIntermediateOutputPath>
   </PropertyGroup>
 

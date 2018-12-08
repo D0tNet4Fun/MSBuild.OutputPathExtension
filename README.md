@@ -15,8 +15,12 @@ The root output path can be configured in two ways:
 - by setting the MSBuild property `RootOutputPath`
 
 #### Change build behavior when the root output path is not available at build time
-The MSBuild roperty `FailIfRootOutputPathNotAvailable` can be set to `true` in order to fail the build in this case. 
+The MSBuild property `FailIfRootOutputPathNotAvailable` can be set to `true` in order to fail the build in this case. 
 When the property is set to `false`, the build will issue a warning and it will proceed using the default output paths.
+
+#### Use links in output path
+The MSBuild property `UseLinksInOutputPath` can be set to `true` to create symbolic links in the output path. This is used to minimize the disk space used by the project output.
+Creating symbolic links require _SeCreateSymbolicLinkPrivilege_. If this is not available at build time then a warning is issued to indicate the process needs to be elevated.
 
 ## Installation
 The extension can be installed and uninstalled using PowerShell scripts available in the Setup directory.

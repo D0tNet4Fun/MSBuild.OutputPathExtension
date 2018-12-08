@@ -36,4 +36,8 @@ CreateDirectoryIfNeeded($destination)
 Copy-Item "$source\Imports\Targets\OutputPathExtension.ImportBefore.props" $destination -Force
 Copy-Item "$source\Imports\Targets\OutputPathExtension.ImportBefore.targets" $destination -Force
 
+$destination = "$msbuildExtensionPath\Microsoft.Common.Targets\ImportAfter"
+CreateDirectoryIfNeeded($destination)
+Copy-Item "$source\Imports\Targets\OutputPathExtension.ImportAfter.targets" $destination -Force
+
 Write-Host "Integrated with Microsoft.Common.Targets"

@@ -1,0 +1,67 @@
+﻿<!--
+***********************************************************************************************
+OutputPathExtension.ImportAfterCommonTargets.props
+
+WARNING:  DO NOT MODIFY this file unless you are knowledgeable about MSBuild and have
+          created a backup copy.  Incorrect changes to this file will make it
+          impossible to load or build your projects from the command-line or the IDE.
+
+***********************************************************************************************
+-->
+
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+
+  <!-- enable CreateSymbolicLink* built-in properties -->
+  <PropertyGroup Condition="'$(UseLinksInOutputPath)' == 'true' AND $(_RootOutputPathExists)">
+    <CreateSymbolicLinksForCopyAdditionalFilesIfPossible>true</CreateSymbolicLinksForCopyAdditionalFilesIfPossible>
+    <CreateSymbolicLinksForCopyFilesToOutputDirectoryIfPossible>true</CreateSymbolicLinksForCopyFilesToOutputDirectoryIfPossible>
+    <CreateSymbolicLinksForCopyLocalIfPossible>true</CreateSymbolicLinksForCopyLocalIfPossible>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(UseLinksInOutputPath)' == 'true' AND $(_RootOutputPathExists)">
+    <PrepareForRunDependsOn>_IgnoreBuildingInsideVisualStudio;$(PrepareForRunDependsOn);_RestoreBuildingInsideVisualStudio;_VerifyOutputIsLinked</PrepareForRunDependsOn>
+  </PropertyGroup>
+
+  <!--
+  ============================================================
+                                      _IgnoreBuildingInsideVisualStudio
+
+  Disable BuildingInsideVisualStudio to allow using hard/symbolic links when copying files to output folder. This overrides MSBuild's behavior which disallows this for some reason.
+  ============================================================
+  -->
+  <Target Name="_IgnoreBuildingInsideVisualStudio"
+          Condition="'$(BuildingInsideVisualStudio)' == 'true'">
+    <PropertyGroup>
+      <_BuildingInsideVisualStudio>$(BuildingInsideVisualStudio)</_BuildingInsideVisualStudio>
+      <BuildingInsideVisualStudio>false</BuildingInsideVisualStudio>
+    </PropertyGroup>
+  </Target>
+
+  <!--
+  ============================================================
+                                      _RestoreBuildingInsideVisualStudio
+
+  Restore the previous value of BuildingInsideVisualStudio.
+  ============================================================
+  -->
+  <Target Name="_RestoreBuildingInsideVisualStudio"
+          Condition="'$(_BuildingInsideVisualStudio)' == 'true'">
+    <PropertyGroup>
+      <BuildingInsideVisualStudio>$(_BuildingInsideVisualStudio)</BuildingInsideVisualStudio>
+      <_BuildingInsideVisualStudio></_BuildingInsideVisualStudio>
+    </PropertyGroup>
+  </Target>
+
+  <!--
+  ============================================================
+                                      _VerifyOutputIsLinked
+
+  Verify if the TargetPath is a symbolic link. If this is not the case then a warning is issued to indicate elevation is required.
+  ============================================================
+  -->
+  <Target Name="_VerifyOutputIsLinked">
+    <Warning Condition="Exists('$(TargetPath)') AND $([MSBuild]::BitwiseAnd(1024, $([System.IO.File]::GetAttributes('$(TargetPath)')))) == 0"
+             Text="[MSBuildOutputPathExtension] Could not use links in the output folder. Make sure the process runs elevated." />
+  </Target>
+
+</Project>

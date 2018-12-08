@@ -1,0 +1,39 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 15
+VisualStudioVersion = 15.0.26730.12
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "MSBuild 15.0 Reference", "MSBuild 15.0 Reference", "{95E15861-E36A-4625-B935-5ACB9207AC27}"
+	ProjectSection(SolutionItems) = preProject
+		C:\Program Files (x86)\Microsoft Visual Studio\2017\Enterprise\MSBuild\15.0\Bin\Microsoft.Common.CurrentVersion.targets = C:\Program Files (x86)\Microsoft Visual Studio\2017\Enterprise\MSBuild\15.0\Bin\Microsoft.Common.CurrentVersion.targets
+		C:\Program Files (x86)\Microsoft Visual Studio\2017\Enterprise\MSBuild\15.0\Microsoft.Common.props = C:\Program Files (x86)\Microsoft Visual Studio\2017\Enterprise\MSBuild\15.0\Microsoft.Common.props
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Scripts", "Scripts", "{E86773A0-6E34-4284-BFF7-3E66F3A0DA50}"
+	ProjectSection(SolutionItems) = preProject
+		MSBuild\OutputPathExtension.ImportBefore.targets = MSBuild\OutputPathExtension.ImportBefore.targets
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Imports", "Imports", "{2F45B2A1-C3EA-48E8-A9E9-3F756A5F89F2}"
+	ProjectSection(SolutionItems) = preProject
+		MSBuild\Imports\OutputPathExtension.ImportAfter.targets = MSBuild\Imports\OutputPathExtension.ImportAfter.targets
+		MSBuild\Imports\OutputPathExtension.ImportBefore.targets = MSBuild\Imports\OutputPathExtension.ImportBefore.targets
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Setup", "Setup", "{654A8766-98BD-43B9-90BE-952B4B03BEFB}"
+	ProjectSection(SolutionItems) = preProject
+		Setup\Install.ps1 = Setup\Install.ps1
+		Setup\Uninstall.ps1 = Setup\Uninstall.ps1
+	EndProjectSection
+EndProject
+Global
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{2F45B2A1-C3EA-48E8-A9E9-3F756A5F89F2} = {E86773A0-6E34-4284-BFF7-3E66F3A0DA50}
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {A1F523CD-7E3F-4435-B749-BB4A514CC839}
+	EndGlobalSection
+EndGlobal

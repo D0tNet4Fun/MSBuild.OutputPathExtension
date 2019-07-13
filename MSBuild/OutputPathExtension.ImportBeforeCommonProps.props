@@ -12,7 +12,7 @@ WARNING:  DO NOT MODIFY this file unless you are knowledgeable about MSBuild and
 <!--EXTERNAL_PROPERTIES: RootOutputPath;FailIfRootOutputPathNotAvailable;ProjectAssetsFile; -->
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   
-  <Import Project="$(MSBuildExtensionsPath)\OutputPathExtension\OutputPathExtension.props" />
+  <Import Project="$(MSBuildThisFileDirectory)OutputPathExtension.props" />
 
   <!-- define property UsingOutputPathExtension which can be used in scripts to detect if OutputPathExtension is being used -->
   <PropertyGroup>

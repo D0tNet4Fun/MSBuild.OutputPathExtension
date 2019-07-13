@@ -45,4 +45,11 @@ WARNING:  DO NOT MODIFY this file unless you are knowledgeable about MSBuild and
     <BaseIntermediateOutputPath Condition="'$(BaseIntermediateOutputPath)' != '' AND !$([System.IO.Path]::IsPathRooted('$(BaseIntermediateOutputPath)'))">$(ProjectRootOutputPath)$(BaseIntermediateOutputPath)</BaseIntermediateOutputPath>
   </PropertyGroup>
 
+  <!-- override MSBuildProjectExtensionsPath that is used by the NuGet targets and whose default value is the obj directory relative to the project directory -->
+  <PropertyGroup Condition="'$(MSBuildProjectExtensionsPath)' != ''">
+    <MSBuildProjectExtensionsPath>$(BaseIntermediateOutputPath)</MSBuildProjectExtensionsPath>
+    <!-- override the initial property to bypass a MSBuild validation that fails the build -->
+    <_InitialMSBuildProjectExtensionsPath>$(BaseIntermediateOutputPath)</_InitialMSBuildProjectExtensionsPath>
+  </PropertyGroup>
+
 </Project>

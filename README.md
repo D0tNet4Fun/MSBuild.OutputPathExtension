@@ -30,5 +30,5 @@ The extension can be installed and uninstalled using PowerShell scripts availabl
 When installed, the extension is automatically imported by MSBuild via `Microsoft.Common.Props` and `Microsoft.Common.Targets`.
 
 ## MSBuild support
-- The extension is supported in MSBuild 15.0.
+- The extension is supported in MSBuild 15.x, 16.x.
 - .NET Core projects are not supported.

@@ -12,7 +12,7 @@ WARNING:  DO NOT MODIFY this file unless you are knowledgeable about MSBuild and
 <!--EXTERNAL_PROPERTIES: RootOutputPath;FailIfRootOutputPathNotAvailable;ProjectAssetsFile; -->
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   
-  <Import Project="$(MSBuildExtensionsPath)\OutputPathExtension\OutputPathExtension.props" />
+  <Import Project="$(MSBuildThisFileDirectory)OutputPathExtension.props" />
 
   <!-- define property UsingOutputPathExtension which can be used in scripts to detect if OutputPathExtension is being used -->
   <PropertyGroup>
@@ -43,6 +43,13 @@ WARNING:  DO NOT MODIFY this file unless you are knowledgeable about MSBuild and
 
   <PropertyGroup Condition="'$(_RootOutputPathExists)' == 'true'">
     <BaseIntermediateOutputPath Condition="'$(BaseIntermediateOutputPath)' != '' AND !$([System.IO.Path]::IsPathRooted('$(BaseIntermediateOutputPath)'))">$(ProjectRootOutputPath)$(BaseIntermediateOutputPath)</BaseIntermediateOutputPath>
+  </PropertyGroup>
+
+  <!-- override MSBuildProjectExtensionsPath that is used by the NuGet targets and whose default value is the obj directory relative to the project directory -->
+  <PropertyGroup Condition="'$(MSBuildProjectExtensionsPath)' != ''">
+    <MSBuildProjectExtensionsPath>$(BaseIntermediateOutputPath)</MSBuildProjectExtensionsPath>
+    <!-- override the initial property to bypass a MSBuild validation that fails the build -->
+    <_InitialMSBuildProjectExtensionsPath>$(BaseIntermediateOutputPath)</_InitialMSBuildProjectExtensionsPath>
   </PropertyGroup>
 
 </Project>

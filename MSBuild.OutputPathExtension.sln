@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 15
-VisualStudioVersion = 15.0.26730.12
+# Visual Studio Version 16
+VisualStudioVersion = 16.0.29123.88
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "MSBuild 15.0 Reference", "MSBuild 15.0 Reference", "{95E15861-E36A-4625-B935-5ACB9207AC27}"
 	ProjectSection(SolutionItems) = preProject
@@ -15,7 +15,6 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Imports", "Imports", "{2F45
 	ProjectSection(SolutionItems) = preProject
 		MSBuild\Imports\Targets\OutputPathExtension.ImportAfter.targets = MSBuild\Imports\Targets\OutputPathExtension.ImportAfter.targets
 		MSBuild\Imports\Props\OutputPathExtension.ImportBefore.props = MSBuild\Imports\Props\OutputPathExtension.ImportBefore.props
-		MSBuild\Imports\Targets\OutputPathExtension.ImportBefore.props = MSBuild\Imports\Targets\OutputPathExtension.ImportBefore.props
 		MSBuild\Imports\Targets\OutputPathExtension.ImportBefore.targets = MSBuild\Imports\Targets\OutputPathExtension.ImportBefore.targets
 	EndProjectSection
 EndProject
@@ -28,7 +27,6 @@ EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Props", "Props", "{EB5BF56A-A5AD-4D0B-AF2B-6DF8EF7924B1}"
 	ProjectSection(SolutionItems) = preProject
 		MSBuild\OutputPathExtension.ImportBeforeCommonProps.props = MSBuild\OutputPathExtension.ImportBeforeCommonProps.props
-		MSBuild\OutputPathExtension.ImportBeforeCommonTargets.props = MSBuild\OutputPathExtension.ImportBeforeCommonTargets.props
 		MSBuild\OutputPathExtension.props = MSBuild\OutputPathExtension.props
 	EndProjectSection
 EndProject

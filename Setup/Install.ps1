@@ -8,15 +8,14 @@ Function CreateDirectoryIfNeeded($path) {
 Function EnsureProcessNotRunning($processName) {
     $process = Get-Process $processName -ErrorAction SilentlyContinue
     if ($process) {
-        Write-Host "$processName is already running. Please close all instances first."
-        Exit
+        throw "$processName is already running. Please close all instances first."
     }
 }
 
-Write-Host "Installing extension in MSBuild 15.0"
+Write-Host "Installing extension in MSBuild Current"
 # fail if MSBuild is running
 EnsureProcessNotRunning("MSBuild");
-$msbuildExtensionPath = "${Env:ProgramFiles(x86)}\MSBuild\15.0"
+$msbuildExtensionPath = "${Env:ProgramFiles(x86)}\MSBuild\Current"
 CreateDirectoryIfNeeded($msbuildExtensionPath)
 
 # copy content to extension directory
@@ -33,7 +32,6 @@ Copy-Item "$source\Imports\Props\OutputPathExtension.ImportBefore.props" $destin
 
 $destination = "$msbuildExtensionPath\Microsoft.Common.Targets\ImportBefore"
 CreateDirectoryIfNeeded($destination)
-Copy-Item "$source\Imports\Targets\OutputPathExtension.ImportBefore.props" $destination -Force
 Copy-Item "$source\Imports\Targets\OutputPathExtension.ImportBefore.targets" $destination -Force
 
 $destination = "$msbuildExtensionPath\Microsoft.Common.Targets\ImportAfter"

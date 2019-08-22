@@ -12,16 +12,58 @@ WARNING:  DO NOT MODIFY this file unless you are knowledgeable about MSBuild and
 <!--EXTERNAL_PROPERTIES: UseLinksInOutputPath;_RootOutputPathExists-->
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
 
-  <!-- enable CreateSymbolicLink* built-in properties -->
+  <!-- enable CreateHardLinks* CreateSymbolicLinks* built-in properties -->
+  <!--use hard links when copying from obj to bin and use symbolic links otherwise -->
   <PropertyGroup Condition="'$(UseLinksInOutputPath)' == 'true' AND $(_RootOutputPathExists)">
     <CreateSymbolicLinksForCopyAdditionalFilesIfPossible>true</CreateSymbolicLinksForCopyAdditionalFilesIfPossible>
-    <CreateSymbolicLinksForCopyFilesToOutputDirectoryIfPossible>true</CreateSymbolicLinksForCopyFilesToOutputDirectoryIfPossible>
     <CreateSymbolicLinksForCopyLocalIfPossible>true</CreateSymbolicLinksForCopyLocalIfPossible>
+    <CreateHardLinksForCopyFilesToOutputDirectoryIfPossible>true</CreateHardLinksForCopyFilesToOutputDirectoryIfPossible>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(UseLinksInOutputPath)' == 'true' AND $(_RootOutputPathExists)">
-    <PrepareForRunDependsOn>_IgnoreBuildingInsideVisualStudio;$(PrepareForRunDependsOn);_RestoreBuildingInsideVisualStudio;_CopyExe;_VerifyOutputIsLinked</PrepareForRunDependsOn>
+    <PrepareForRunDependsOn>_IgnoreBuildingInsideVisualStudio;$(PrepareForRunDependsOn);_RestoreBuildingInsideVisualStudio</PrepareForRunDependsOn>
   </PropertyGroup>
+
+  <!--
+  ============================================================
+                                      _LinkOutputDirectories
+
+  Creates symbolic links for obj\ and bin\ to target corresponding directories relative to $(ProjectRootOutputPath).
+  This happens either before restoring NuGet packages (if the project uses PackageReferences) or before the build runs.
+  ============================================================
+  -->
+  <Target Name="_LinkOutputDirectories"
+          Condition="$(UseLinksInOutputPath) == 'true'"
+          BeforeTargets="PrepareForBuild"
+          AfterTargets="_GenerateProjectRestoreGraph">
+    <ItemGroup>
+      <LinkOutputDirectory Include="$(IntermediateOutputPath)" Condition="!$([System.IO.Path]::IsPathRooted('$(IntermediateOutputPath)'))">
+        <RootPath>$(IntermediateOutputPath.Split('\')[0])\</RootPath>
+        <FinalPath>$(ProjectRootOutputPath)%(RootPath)</FinalPath>
+      </LinkOutputDirectory>
+      <LinkOutputDirectory Include="$(OutDir)" Condition="!$([System.IO.Path]::IsPathRooted('$(OutDir)'))">
+        <RootPath>$(OutDir.Split('\')[0])\</RootPath>
+        <FinalPath>$(ProjectRootOutputPath)%(RootPath)</FinalPath>
+      </LinkOutputDirectory>
+    </ItemGroup>
+
+    <!-- delete the root paths if they are not symlinks -->
+    <Message Condition="Exists('%(LinkOutputDirectory.RootPath)') AND $([MSBuild]::BitwiseAnd(1024, $([System.IO.File]::GetAttributes('%(LinkOutputDirectory.RootPath)')))) == 0"
+              Importance="normal" Text='Converting directory "%(LinkOutputDirectory.RootPath)" to a symbolic link targeting "%(LinkOutputDirectory.FinalPath)"' />
+    <RemoveDir Condition="Exists('%(LinkOutputDirectory.RootPath)') AND $([MSBuild]::BitwiseAnd(1024, $([System.IO.File]::GetAttributes('%(LinkOutputDirectory.RootPath)')))) == 0"
+                Directories="%(LinkOutputDirectory.RootPath)" />
+    <!--create the final path directories that will be used as targets for the project relative output directories (obj\ and bin\) -->
+    <MakeDir Directories="%(LinkOutputDirectory.FinalPath)" />
+    <Exec Command='mklink /D "%(LinkOutputDirectory.RootPath)" "%(LinkOutputDirectory.FinalPath)" >NUL'
+          Condition="!Exists('%(LinkOutputDirectory.RootPath)')"
+          ContinueOnError="true">
+      <Output TaskParameter="ExitCode" PropertyName="MklinkExitCode" />
+    </Exec>
+    <Warning Text="Could not create a symbolic link for directory %(LinkOutputDirectory.RootPath). Make sure the process runs elevated."
+             Condition="$(MklinkExitCode) != '' AND '$(MSBuildLastTaskResult)' == 'false'" />
+    <Message Importance="normal" Text='Symbolic link created from "%(LinkOutputDirectory.RootPath)" to "%(LinkOutputDirectory.FinalPath)"'
+             Condition="$(MklinkExitCode) != '' AND '$(MSBuildLastTaskResult)' == 'true'" />
+  </Target>
 
   <!--
   ============================================================
@@ -51,33 +93,6 @@ WARNING:  DO NOT MODIFY this file unless you are knowledgeable about MSBuild and
       <BuildingInsideVisualStudio>$(_BuildingInsideVisualStudio)</BuildingInsideVisualStudio>
       <_BuildingInsideVisualStudio></_BuildingInsideVisualStudio>
     </PropertyGroup>
-  </Target>
-
-  <!--
-  ============================================================
-                                      _CopyExe
-
-  If the target path is an .exe, this .exe needs to be copied to the final output path as a new file instead of as a symbolic link.
-  ============================================================
-  -->
-  <Target Name="_CopyExe" Condition="'$(TargetExt)' == '.exe'">
-    <PropertyGroup>
-      <_IntermediateTargetPath>$(IntermediateOutputPath)$(TargetFileName)</_IntermediateTargetPath>
-    </PropertyGroup>
-    <Delete Files="$(TargetPath)" ContinueOnError="true" />
-    <Copy SourceFiles="$(_IntermediateTargetPath)" DestinationFiles="$(TargetPath)" SkipUnchangedFiles="false" />
-  </Target>
-
-  <!--
-  ============================================================
-                                      _VerifyOutputIsLinked
-
-  Verify if the TargetPath is a symbolic link. If this is not the case then a warning is issued to indicate elevation is required.
-  ============================================================
-  -->
-  <Target Name="_VerifyOutputIsLinked" Condition="'$(TargetExt)' != '.exe'">
-    <Warning Condition="Exists('$(TargetPath)') AND $([MSBuild]::BitwiseAnd(1024, $([System.IO.File]::GetAttributes('$(TargetPath)')))) == 0"
-             Text="[MSBuildOutputPathExtension] Could not use links in the output folder. Make sure the process runs elevated." />
   </Target>
 
 </Project>

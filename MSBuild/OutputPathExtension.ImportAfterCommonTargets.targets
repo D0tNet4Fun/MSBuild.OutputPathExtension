@@ -20,48 +20,97 @@ WARNING:  DO NOT MODIFY this file unless you are knowledgeable about MSBuild and
     <CreateHardLinksForCopyFilesToOutputDirectoryIfPossible>true</CreateHardLinksForCopyFilesToOutputDirectoryIfPossible>
   </PropertyGroup>
 
+  <!-- override MSBuild targets -->
   <PropertyGroup Condition="'$(UseLinksInOutputPath)' == 'true' AND $(_RootOutputPathExists)">
-    <PrepareForRunDependsOn>_IgnoreBuildingInsideVisualStudio;$(PrepareForRunDependsOn);_RestoreBuildingInsideVisualStudio</PrepareForRunDependsOn>
+    <BuildDependsOn>
+      _LinkOutputDirectories;
+      $(BuildDependsOn)
+    </BuildDependsOn>
+    <PrepareForRunDependsOn>
+      _IgnoreBuildingInsideVisualStudio;
+      $(PrepareForRunDependsOn);
+      _RestoreBuildingInsideVisualStudio
+    </PrepareForRunDependsOn>
   </PropertyGroup>
 
+  <!--define the output directories that should be converted to symbolic links targeting directories relative to $(ProjectRootOutputPath) -->
+  <ItemGroup>
+    <LinkOutputDirectory Include="$(IntermediateOutputPath)">
+      <Type>intermediate</Type>
+    </LinkOutputDirectory>
+    <LinkOutputDirectory Include="$(OutDir)">
+      <Type>final</Type>
+    </LinkOutputDirectory>
+  </ItemGroup>
   <!--
   ============================================================
                                       _LinkOutputDirectories
 
-  Creates symbolic links for obj\ and bin\ to target corresponding directories relative to $(ProjectRootOutputPath).
+  Creates symbolic links for LinkOutputDirectories to target corresponding directories relative to $(ProjectRootOutputPath).
   This happens either before restoring NuGet packages (if the project uses PackageReferences) or before the build runs.
   ============================================================
   -->
   <Target Name="_LinkOutputDirectories"
-          Condition="$(UseLinksInOutputPath) == 'true'"
-          BeforeTargets="PrepareForBuild"
-          AfterTargets="_GenerateProjectRestoreGraph">
-    <ItemGroup>
-      <LinkOutputDirectory Include="$(IntermediateOutputPath)" Condition="!$([System.IO.Path]::IsPathRooted('$(IntermediateOutputPath)'))">
-        <RootPath>$(IntermediateOutputPath.Split('\')[0])\</RootPath>
-        <FinalPath>$(ProjectRootOutputPath)%(RootPath)</FinalPath>
-      </LinkOutputDirectory>
-      <LinkOutputDirectory Include="$(OutDir)" Condition="!$([System.IO.Path]::IsPathRooted('$(OutDir)'))">
-        <RootPath>$(OutDir.Split('\')[0])\</RootPath>
-        <FinalPath>$(ProjectRootOutputPath)%(RootPath)</FinalPath>
-      </LinkOutputDirectory>
-    </ItemGroup>
+          Condition="$(UseLinksInOutputPath) == 'true' AND $(_RootOutputPathExists) == 'true'"
+          DependsOnTargets="_LinkOutputDirectory" />
 
-    <!-- delete the root paths if they are not symlinks -->
-    <Message Condition="Exists('%(LinkOutputDirectory.RootPath)') AND $([MSBuild]::BitwiseAnd(1024, $([System.IO.File]::GetAttributes('%(LinkOutputDirectory.RootPath)')))) == 0"
-              Importance="normal" Text='Converting directory "%(LinkOutputDirectory.RootPath)" to a symbolic link targeting "%(LinkOutputDirectory.FinalPath)"' />
-    <RemoveDir Condition="Exists('%(LinkOutputDirectory.RootPath)') AND $([MSBuild]::BitwiseAnd(1024, $([System.IO.File]::GetAttributes('%(LinkOutputDirectory.RootPath)')))) == 0"
-                Directories="%(LinkOutputDirectory.RootPath)" />
-    <!--create the final path directories that will be used as targets for the project relative output directories (obj\ and bin\) -->
-    <MakeDir Directories="%(LinkOutputDirectory.FinalPath)" />
-    <Exec Command='mklink /D "%(LinkOutputDirectory.RootPath)" "%(LinkOutputDirectory.FinalPath)" >NUL'
-          Condition="!Exists('%(LinkOutputDirectory.RootPath)')"
+  <Target Name="_LinkOutputDirectory" Inputs="@(LinkOutputDirectory)" Outputs="%(LinkOutputDirectory.Identity)">
+    <!-- get the full path of this LinkOutputDirectory. i.e:
+           Project directory = C:\Project
+           LinkOutputDirectory = obj\Debug
+           Result = C:\Project\obj\Debug -->
+    <PropertyGroup>
+      <LinkOutputDirectory>@(LinkOutputDirectory)</LinkOutputDirectory>
+      <LinkOutputDirectory>$([System.IO.Path]::GetFullPath('$(LinkOutputDirectory)'))</LinkOutputDirectory>
+      <LinkOutputDirectory Condition="!HasTrailingSlash('$(LinkOutputDirectory)')">$(LinkOutputDirectory)\</LinkOutputDirectory>
+      <LinkOutputDirectoryParent>$([System.IO.Path]::GetDirectoryName('$(LinkOutputDirectory.TrimEnd('\'))'))</LinkOutputDirectoryParent>
+    </PropertyGroup>
+    <!--LinkOutputDirectory needs to be converted to a symlink eventually, but first we have to inspect it as it can be one of these:
+          1. a child directory of ProjectDirectory, i.e. C:\Project\obj\Debug
+             in this case we leave it as it is
+          2. same as ProjectDirectory
+             in this case there's nothing we can do regarding the conversion (we can't convert ProjectDirectory to a symlink!)
+          3. not a child directory of ProjectDirectory, i.e. C:\Foreign\Output\Frameowrk\obj\Debug
+             in this case we have to assume the user defined it and leave it alone -->
+    <PropertyGroup>
+      <_LinkOutputDirectoryRelativeToProjectDirectory>$([MSBuild]::MakeRelative('$(MSBuildProjectDirectory)', '$(LinkOutputDirectory)'))</_LinkOutputDirectoryRelativeToProjectDirectory>
+      <_IsSameAsProjectDirectory Condition="$(_LinkOutputDirectoryRelativeToProjectDirectory) == ''">true</_IsSameAsProjectDirectory>
+      <_IsNotChildOfProjectDirectory Condition="$(_LinkOutputDirectoryRelativeToProjectDirectory.StartsWith('..\'))">true</_IsNotChildOfProjectDirectory>
+      <_IsChildOfProjectDirectory Condition="$(_IsSameAsProjectDirectory) != 'true' AND $(_IsNotChildOfProjectDirectory) != 'true'">true</_IsChildOfProjectDirectory>
+    </PropertyGroup>
+    <Message Importance="normal" Condition="$(_IsChildOfProjectDirectory) == 'true'" Text="[OutputPathExtension] The %(LinkOutputDirectory.Type) output directory '$(LinkOutputDirectory)' is beneath the project directory. This directory can be linked."/>
+    <Warning Condition="$(_IsSameAsProjectDirectory) == 'true'" Text="[OutputPathExtension] The %(LinkOutputDirectory.Type) output directory '$(LinkOutputDirectory)' matches the project directory. This directory is not allowed to be linked." />
+    <Warning Condition="$(_IsNotChildOfProjectDirectory) == 'true'" Text="[OutputPathExtension] The %(LinkOutputDirectory.Type) output directory '$(LinkOutputDirectory)' is not beneath the project directory. This directory will not be linked." />
+
+    <PropertyGroup>
+      <!-- get the target of LinkOutputDirectory relative to $(RootOutputPath). i.e.:
+           LinkOutputDirectory = C:\Project\obj\Debug
+           RootOutputPath = R:\Build
+           Reuslt = R:\Build\C\Project\obj\Debug -->
+      <LinkOutputDirectoryTarget>$(RootOutputPath)$(LinkOutputDirectory.Replace(':\', '\'))</LinkOutputDirectoryTarget>
+      <!--add the trailing slash if needed -->
+      <LinkOutputDirectoryTarget Condition="!HasTrailingSlash('$(LinkOutputDirectoryTarget)')">$(LinkOutputDirectoryTarget)\</LinkOutputDirectoryTarget>
+    </PropertyGroup>
+
+    <!--create the symlink unless it exists (only when LinkOutputPath is a child of ProjectDirectory) -->
+    <!-- 1. delete LinkOutputDirectory if it is not a symlink -->
+    <Message Condition="$(_IsChildOfProjectDirectory) == 'true' AND Exists('$(LinkOutputDirectory)') AND $([MSBuild]::BitwiseAnd(1024, $([System.IO.File]::GetAttributes('$(LinkOutputDirectory)')))) == 0"
+              Importance="normal" Text='Converting %(LinkOutputDirectory.Type) output directory "$(LinkOutputDirectory)" to a symbolic link targeting "$(LinkOutputDirectoryTarget)"' />
+    <RemoveDir Condition="$(_IsChildOfProjectDirectory) == 'true' AND Exists('$(LinkOutputDirectory)') AND $([MSBuild]::BitwiseAnd(1024, $([System.IO.File]::GetAttributes('$(LinkOutputDirectory)')))) == 0"
+                Directories="$(LinkOutputDirectory)" />
+    <!-- 2. create directories on disk -->
+    <MakeDir Condition="!Exists('$(LinkOutputDirectoryParent)')" Directories="$(LinkOutputDirectoryParent)" />
+    <MakeDir Condition="$(_IsChildOfProjectDirectory) == 'true' AND !Exists('$(LinkOutputDirectoryTarget)')" Directories="$(LinkOutputDirectoryTarget)" />
+    <!-- 3. create the symlink -->
+    <Exec Command='mklink /D "$(LinkOutputDirectory)" "$(LinkOutputDirectoryTarget)" >NUL'
+          Condition="$(_IsChildOfProjectDirectory) == 'true' AND !Exists('$(LinkOutputDirectory)')"
           ContinueOnError="true">
       <Output TaskParameter="ExitCode" PropertyName="MklinkExitCode" />
     </Exec>
-    <Warning Text="Could not create a symbolic link for directory %(LinkOutputDirectory.RootPath). Make sure the process runs elevated."
+    <!--4. log outcome -->
+    <Warning Text="Could not create a symbolic link for %(LinkOutputDirectory.Type) output directory $(LinkOutputDirectory). Make sure the process runs elevated."
              Condition="$(MklinkExitCode) != '' AND '$(MSBuildLastTaskResult)' == 'false'" />
-    <Message Importance="normal" Text='Symbolic link created from "%(LinkOutputDirectory.RootPath)" to "%(LinkOutputDirectory.FinalPath)"'
+    <Message Importance="high" Text='Symbolic link created from "$(LinkOutputDirectory)" to "$(LinkOutputDirectoryTarget)"'
              Condition="$(MklinkExitCode) != '' AND '$(MSBuildLastTaskResult)' == 'true'" />
   </Target>
 

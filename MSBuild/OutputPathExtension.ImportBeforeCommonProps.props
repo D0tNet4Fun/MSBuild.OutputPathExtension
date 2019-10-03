@@ -24,21 +24,4 @@ WARNING:  DO NOT MODIFY this file unless you are knowledgeable about MSBuild and
     <_RootOutputPathExists Condition="Exists('$(RootOutputPath)')">true</_RootOutputPathExists>
   </PropertyGroup>
 
-  <PropertyGroup Condition="'$(_RootOutputPathExists)' == 'true'">
-    <!-- determine $(ProjectBaseOutputPath) which will be used as the path for this project's output -->
-    <!-- given ProjectDir is E:\Path\To\Projects\MyProject, then: -->
-
-    <ProjectDirRoot>$([System.IO.Path]::GetPathRoot('$(MSBuildProjectDirectory)'))</ProjectDirRoot>
-    <!-- E:\ -->
-    <ProjectDirDrive>$(ProjectDirRoot.Substring(0, 1))</ProjectDirDrive>
-    <!-- E -->
-    <ProjectDirRelativeToRoot>$([MSBuild]::MakeRelative('$(ProjectDirRoot)', '$(MSBuildProjectDirectory)'))</ProjectDirRelativeToRoot>
-    <!-- Path\To\Projects\MyProject -->
-    <!-- note: this should be identical to MSBuildProjectDirectoryNoRoot but that one is escaped, so not good enough -->
-
-    <ProjectRootOutputPath>$([System.IO.Path]::Combine('$(RootOutputPath)', '$(ProjectDirDrive)', '$(ProjectDirRelativeToRoot)'))</ProjectRootOutputPath>
-    <ProjectRootOutputPath Condition="!HasTrailingSlash('$(ProjectRootOutputPath)')">$(ProjectRootOutputPath)\</ProjectRootOutputPath>
-    <!-- $(RootOutputPath)\E\Path\To\Projects\MyProject\ -->
-  </PropertyGroup>
-
 </Project>

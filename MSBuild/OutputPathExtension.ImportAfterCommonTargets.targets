@@ -22,6 +22,10 @@ WARNING:  DO NOT MODIFY this file unless you are knowledgeable about MSBuild and
 
   <!-- override MSBuild targets -->
   <PropertyGroup Condition="'$(UseLinksInOutputPath)' == 'true' AND $(_RootOutputPathExists)">
+    <CleanDependsOn>
+      _LinkOutputDirectories;
+      $(CleanDependsOn)
+    </CleanDependsOn>
     <BuildDependsOn>
       _LinkOutputDirectories;
       $(BuildDependsOn)
@@ -75,8 +79,8 @@ WARNING:  DO NOT MODIFY this file unless you are knowledgeable about MSBuild and
     <PropertyGroup>
       <_LinkOutputDirectoryRelativeToProjectDirectory>$([MSBuild]::MakeRelative('$(MSBuildProjectDirectory)', '$(LinkOutputDirectory)'))</_LinkOutputDirectoryRelativeToProjectDirectory>
       <_IsSameAsProjectDirectory Condition="$(_LinkOutputDirectoryRelativeToProjectDirectory) == ''">true</_IsSameAsProjectDirectory>
-      <_IsNotChildOfProjectDirectory Condition="$(_LinkOutputDirectoryRelativeToProjectDirectory.StartsWith('..\'))">true</_IsNotChildOfProjectDirectory>
-      <_IsChildOfProjectDirectory Condition="$(_IsSameAsProjectDirectory) != 'true' AND $(_IsNotChildOfProjectDirectory) != 'true'">true</_IsChildOfProjectDirectory>
+      <_IsChildOfProjectDirectory Condition="!$([System.IO.Path]::IsPathRooted($(_LinkOutputDirectoryRelativeToProjectDirectory)))">true</_IsChildOfProjectDirectory>
+      <_IsNotChildOfProjectDirectory Condition="$(_IsSameAsProjectDirectory) != 'true' AND $(_IsChildOfProjectDirectory) != 'true'">true</_IsNotChildOfProjectDirectory>
     </PropertyGroup>
     <Message Importance="normal" Condition="$(_IsChildOfProjectDirectory) == 'true'" Text="[OutputPathExtension] The %(LinkOutputDirectory.Type) output directory '$(LinkOutputDirectory)' is beneath the project directory. This directory can be linked."/>
     <Warning Condition="$(_IsSameAsProjectDirectory) == 'true'" Text="[OutputPathExtension] The %(LinkOutputDirectory.Type) output directory '$(LinkOutputDirectory)' matches the project directory. This directory is not allowed to be linked." />
